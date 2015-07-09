@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER yutaf <yutafuji2008@gmail.com>
 
 RUN apt-get update
-RUN apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # binaries
   git \
   man \
@@ -17,6 +17,8 @@ RUN apt-get install -y \
 # sqlite3
   sqlite3 \
   libsqlite3-dev \
+# mysql
+  mysql-server-5.6 \
 ## Apache, php \
 #  make \
 #  gcc \
@@ -57,6 +59,7 @@ COPY www/Gemfile www/Gemfile.lock /srv/www/
 RUN echo 'gem: --no-rdoc --no-ri' >> $HOME/.gemrc && \
   gem install bundler && \
   (cd /srv/www; bundle install)
+
 
 #
 # Apache
@@ -170,6 +173,26 @@ RUN echo 'gem: --no-rdoc --no-ri' >> $HOME/.gemrc && \
 #
 ## make Apache document root
 #COPY www/htdocs/ /srv/www/htdocs/
+
+# mysql config
+COPY templates/my.cnf /etc/mysql/my.cnf
+RUN mkdir -p -m 777 /var/tmp/mysql && \
+# alternative to　"mysql_secure_installation"
+  /etc/init.d/mysql start && \
+#TODO command below issues 'Warning: Using a password on the command line interface can be insecure.'
+#TODO http://qiita.com/cs_sonar/items/d4a0534a0eaeb93b3215
+  mysqladmin -u root password "ai3Yut4x" && \
+  echo "[client]"             >> /root/.my.cnf && \
+  echo "user = root"          >> /root/.my.cnf && \
+  echo "password = ai3Yut4x"  >> /root/.my.cnf && \
+  echo "host = localhost"     >> /root/.my.cnf && \
+  chmod 600 /root/.my.cnf && \
+  mysql --defaults-extra-file=/root/.my.cnf -e "DELETE FROM mysql.user WHERE User='';" && \
+  mysql --defaults-extra-file=/root/.my.cnf -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');" && \
+  mysql --defaults-extra-file=/root/.my.cnf -e "DROP DATABASE IF EXISTS test;" && \
+  mysql --defaults-extra-file=/root/.my.cnf -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';" && \
+  mysql --defaults-extra-file=/root/.my.cnf -e "FLUSH PRIVILEGES;" && \
+  /etc/init.d/mysql stop
 
 # supervisor
 COPY templates/supervisord.conf /etc/supervisor/conf.d/
