@@ -11,6 +11,9 @@ export TERM=xterm-256color
 ## php upload_tmp_dir
 #mkdir -m 777 -p /srv/php/upload_tmp_dir
 
+# start mysql
+/etc/init.d/mysql start
+
 #
 # Run container foreground
 #
