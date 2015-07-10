@@ -19,6 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libsqlite3-dev \
 # mysql
   mysql-server-5.6 \
+  libmysqlclient-dev \
 ## Apache, php \
 #  make \
 #  gcc \
