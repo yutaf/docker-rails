@@ -45,10 +45,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
   supervisor
 
 # ruby
-RUN curl -L -O http://ftp.ruby-lang.org/pub/ruby/2.2/ruby-2.2.2.tar.gz && \
-  tar -zxvf ruby-2.2.2.tar.gz
-
-RUN cd ruby-2.2.2 && \
+# from http://ftp.ruby-lang.org/pub/ruby/2.2/ruby-2.2.2.tar.gz
+COPY ./src/ruby-2.2.2.tar.gz .
+RUN \
+  tar -zxvf ruby-2.2.2.tar.gz && \
+  cd ruby-2.2.2 && \
   ./configure --disable-install-doc && \
   make && \
   make install && \
